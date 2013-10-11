@@ -17,7 +17,8 @@ Summary:        A distributed, fault-tolerant Jabber/XMPP server
 Group:          Applications/Internet
 License:        GPLv2+
 URL:            http://www.ejabberd.im/
-Source0:        http://www.process-one.net/downloads/%{name}/%{version}/%{name}-%{version}.tar.gz
+#Source0:        http://www.process-one.net/downloads/%{name}/%{version}/%{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 Source1:        ejabberd.init
 Source2:        ejabberd.logrotate
 Source3:        ejabberd.sysconfig
@@ -83,11 +84,9 @@ Documentation for ejabberd.
 %setup -q
 
 %build
-#pushd src
-%configure --enable-odbc --enable-pam
+%configure --enable-odbc --enable-pam --enable-mysql --enable-all --enable-nif --enable-user=ejabberd
 # doesn't builds on SMP currently
 make
-#popd
 %if 0%{?with_hevea}
 pushd doc
 # remove pre-built docs
@@ -100,9 +99,7 @@ popd
 %install
 rm -rf %{buildroot}
 
-#pushd src
 make install DESTDIR=%{buildroot}
-#popd
 
 # fix example SSL certificate path to real one, which we created recently (see above)
 %{__perl} -pi -e 's!/path/to/ssl.pem!/etc/ejabberd/ejabberd.pem!g' %{buildroot}/etc/ejabberd/ejabberd.yml
@@ -226,8 +223,8 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 
-%dir %{_docdir}/%{name}-%{version}
-%doc %{_docdir}/%{name}-%{version}/COPYING
+%dir %{_docdir}/%{name}
+%doc %{_docdir}/%{name}/COPYING
 
 %attr(750,ejabberd,ejabberd) %dir %{_sysconfdir}/ejabberd
 %attr(640,ejabberd,ejabberd) %config(noreplace) %{_sysconfdir}/ejabberd/ejabberd.yml
